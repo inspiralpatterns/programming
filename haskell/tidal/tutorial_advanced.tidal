@@ -1,0 +1,141 @@
+-- Example of pattern transformed over channels
+-- L channel play the original pattern with delay
+-- R channel play a squeezed and offsetted version of it
+d2 $ jux (
+  (# delaytime "0.37 0.78") .
+  (# delay 0.3)
+  )
+  $ brak
+  $ sound "bd sd . drum"
+
+hush
+
+
+-- Example of sound processing involving conditional logic on speed and delay
+d1
+  $ within (0.25, 0.75) (fast 2) -- change speed
+  $ within (0.5, 1) (# delay 0.3) -- add delay in second half of pattern
+  $ sound (samples "arpy*4" (every 2 (fast 1.5) $ run 2)) -- play a loop of 2 sample (and speed it up every second bar)
+  # delaytime "0.150 0.375"
+  # speed (whenmod 4 3 (*0.5) "[1 2, 1.25]") -- change pitch
+
+
+-- Example of sample granulation (stutter-like)
+d3
+  $ jux ((# speed "1.1") . rev) -- reverse and play splightly fast in R channel
+  $ slow 4
+  $ striate' 64 (1/16) -- cut sample into bits, define grain length
+  $ sound "ade:3"
+  # gain 0.7
+
+
+-- How to isolate a portion of the sample?
+-- 1. split the sample
+-- 2. play only a part of the pattern
+d4
+  $ trunc 0.75
+  $ rev
+  $ striate' 16 0.1
+  $ sound "bd:3"
+  # gain 1.5
+  # pan sine
+
+
+setcps 0.5
+
+-- Example of arithmetic on patterns
+-- obs: control pattern loops over 4-step sequence
+d5
+    $ stut' 2 (0.125/3)
+    (
+       (# crush "{7 3}%8")
+      . (+ coarse "{2 4}%2")
+      . (# delay 0.5)
+    )
+    $ every 3 (|-| speed "{0.5 2}%4") -- subtract to speed (negative speed plays reverse)
+    $ s "tabla2"
+    # speed 1
+
+
+-- Example of /do/ block and declaration
+-- function definition
+let inverse x = 1 - x
+
+do
+  let ch = "{0 3 5}%4" -- define the change
+  let gainPat = "1 1*2 0 1 0*2 1/2"
+  let panPat = "1 0*2 1"
+  d1 $ gain gainPat # sound "arpy" # up ch*3 # pan panPat -- scaling ch and applying pan
+  d2 $ gain (gainPat/1.5) # sound "arpy" # up ch -- scaling gainPat
+  d3
+    $ (0.25 <~) -- backwards time shift
+    $ foldEvery [3, 4] (fast 2) -- chain of multiple /every/ function
+    $ gain (inverse <$> gainPat) # sound "bd" # pan (inverse <$> panPat)  -- bd is playing the inverse of gainpat and panpat
+
+
+do
+  let x = 3 -- how many notes to add (depth)
+  let y = 0.4 -- feedback
+  let z = 0.125 -- time
+  d1
+    $ rev
+    $ stut' (x+2) (z/2) (
+      (# crush (choose [2,4,5]))
+      . (* gain 0.5)
+      . (+ pan 0.3)
+    ) -- apply fx chain to augmented sequence
+    $ degrade
+    $ (
+      stut x y z  -- stut a different way, using common parameters
+      $ sound "bd(3,8)"
+      # gain "1.2 0.7"
+    )
+
+
+-- On the use of /cut/
+-- cut defines a cutgroup, which extends to multiple input
+d1 $ sound "moog*4" # n (run 4) # cut 1
+d2 $ sound "bd*3 sn*3" # cut 1
+-- instead: d2 $ sound "bd*3 sn*3" # cut 2
+d2 $ sound "bd*3 sn*3" # cut "-1" -- cut only the same sample
+
+-- cut accepts patterns and function (to allow some bleeding)
+d2 $ sound "tabla:2*3 tabla:2*4" # cut (choose [1..3])
+
+
+-- Elastic tempo flux
+-- using /nudge/
+d1 $ sound "cp*4"
+
+d2 $ sound "bd*4" # nudge "0.1 0.3" -- altering the scheduling (acts as time shifting)
+
+d2 $ sound "tabla:2*2"
+  # nudge (
+    range "-1" 1  -- scaling the sine values
+    $ slow 4 -- slowing the sine freq
+    $ sine
+    ) # cut 1 -- using continuous patterns
+
+-- using /spaceOut/
+-- playing each speed in the list and looping over
+d1 $ spaceOut [1, 2]
+  $ sound "tabla:1 tabla:2"
+  # cut (irand 3)
+
+
+-- use of `rot`: pattern rotation, but keeping the structure
+-- (good for variation and/or fills)
+d1
+  $ stack [
+    rot ("<0 1>") -- applies to both speed and n patterns
+    $ speed "[1 2 -1 0.5]%8"
+    <| n "0 ~ 1 2 0 2 ~ 3*2"
+    # sound "drum"
+    # nudge ((irand 5)*0.01) -- apply some 'human feel'
+    ,
+    speed "[1*3 -1]%2"
+    $ stutWith 7 (1/16) (|* gain 0.8)
+    $ sound "~ sn:2"
+  ]
+
+d2 $ s "cp*4" # gain 0.7

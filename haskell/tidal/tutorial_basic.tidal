@@ -1,0 +1,267 @@
+-- BASIC TIDAL KICK OFF TUTORIAL
+-- trigger sound sequences
+
+d1 $ sound "damage_bd" # n 4
+
+d1 $ sound "damage_bd:2" -- same as before
+
+d2 $ sound "damage_electro_hh:1 . ~ . damage_electro_hh:2"
+
+-- referring to a sequence by name
+p "pattern" $ sound "hh hh hh" # n "0"
+
+-- silence pattern (=empty)
+d1 silence
+
+d2 silence
+
+p "pattern" silence
+
+d3 $ sound "~ high/2" # n 2 # gain 1.5
+
+-- solo/unsolo sequences
+solo 3
+unsolo 3
+
+-- patterns inside patterns
+-- square brackets hold events for a single step
+d1 $ sound "[bd bd] sn:1"
+
+-- marking out feet
+d3 $ sound "hh . hh hh . ~ . hh"
+
+-- layering (polirythms)
+d4 $ sound "[~ . bass, ~ damage_rim . ~ . damage_rim:1]"
+
+-- one sample per cycle (loop over steps)
+d3 $ sound "<hh  hh:7 ~ >"
+
+-- doubling and halving
+d3 $ sound "<hh*2  hh:7 ~ >"
+
+d3 $ sound "<hh  hh:7/2>" -- hh playing every 2 cycles
+
+
+-- MODIFYING SEQUENCES WITH FUNCTIONS
+-- reverse (pattern, not sound!)
+d3 $ rev (sound "hh . hh hh . ~ . hh")
+
+d3 $ every 3 (rev) (sound "hh . hh hh . ~ . hh") -- reverse every 3 cycles
+
+-- speed (pattern, not sound!)
+d3 $ slow 2 (sound "hh . hh hh . ~ . hh")
+
+d3 $ every 3 (slow 2) (sound "bd . hh hh . ~ . sd") -- half speed every 3 cycles
+
+d3 $ sound (every 3 (slow 2) "bd . hh hh . ~ . sd") -- equivalent, but operates on the patterns rather than on the triggers
+
+
+-- EFFECTS (aka control patterns)
+d2 $ sound "bd . hh hh:8 . ~ . sn:1" # crush "7" -- applying bitcrushing
+
+d3 $ sound "bd" # n "9" # crush "6" # speed "0.3" -- applying bitcrushing + playback speed
+
+-- control patterns = sound patterns
+d1 $ sound "bd . hh hh . ~ . sd" # gain "0.9 . 0.6 0.8 . ~ . 0.7"
+
+d1 $ sound "bd*4 sn*4" # gain "[[1 0.5]*2 [0.3 0.7]]/2" -- gain pattern long double as much sample pattern
+
+-- applying function to control patterns
+d1 $ sound "bd . hh hh . ~ . sd" # gain (every 3 (rev) $ "0.9 . 0.6 0.8 . ~ . 0.7")
+
+-- order matters!
+d1 $ gain "1 0.8 0.5 0.7" # sound "bd" -- 4 bd per beat (structure given by gain)
+
+d1 $ sound "bd" # gain "1 0.8 0.5 0.7" -- 1 bd per beat (structure given by sound)
+
+-- OPERATORS
+d1 $ sound "arpy*4" # speed "0.5"
+
+d1 $ sound "arpy*4" |> speed "0.5" -- |> equivalent to #
+
+d1 $ every 2 (|+ speed "1") $ sound "arpy*4" |> speed "0.5" -- increase the speed to 1.5 every other cycle
+
+d1 $ every 2 (# pan "1") $ sound "arpy*4" # pan "0" -- change pan every other cycle
+
+-- SHORTHAND
+d1 $ sound "arpy(3,7)" # n "2"
+
+d1 $ sound "arpy(3,7)" # n 2 -- equivalent w/ double quotes
+
+-- PATTERN MANIPULATION W/ LINEAR ALGEBRA
+d1
+  $ sound "bass(3,7)"
+  # note
+  (
+    every 2 (*2) "0 2" -- pitch pattern scaled every two
+  )
+  # gain
+  (
+    every 2 (rev) "1 0.5"  -- gain pattern reversed every two
+  )
+
+
+-- obs: pattern structure is given by note pattern
+d1
+  $ n
+  (
+    off 0.125 (+12)   -- first offset on note pattern by octave
+    $ off 0.25 (+7)   -- second offset on note patter by ascending 5th
+    $ slow 2
+    $ "0(3,8) [5 7]"  -- Euclidean rhythm in the first half of the note pattern
+  )
+  # sound "bass"
+
+hush
+
+-- range lists (chromatic scale in 5:8)
+d1 $ n (slow 2 $ "0(3,8) [0 .. 5]") # sound "bass"
+
+
+-- SAMPLE PLAYBACK SPEED
+-- pattern of speeds
+d1 $ speed "1 2 -1 -0.5" # sound "arpy"
+
+-- multiple speeds at the same time
+d1 $ speed "[1 0.5, 1.5 2 3 4]" # sound "arpy"
+
+-- euclidean sequences
+d1 $ euclid 5 8 $ sound "bd"
+
+d1 $ sound "bd(5,8)" -- equivalent
+
+d1 $ euclid "<3 5 6>" "8" $ s "bd" -- accepts patterns as params
+
+
+-- TEMPO
+setcps 1 -- set cycle per second
+
+setcps(140/60/4) -- set 4 beats per bar, 140 bpm
+
+d1 $ sound "hh hh . hh:7" # cps (slow 8 $ range 0.5 1.5 saw) -- pattern the tempo
+
+
+-- SELECTING SAMPLES INDEXES
+
+d1 $ n "0 2 4 5" # sound "arpy"
+d1 $ sound $ samples "arpy*4" "0 2 4 5" -- equivalent
+
+d1 $ n (run 4+1) # sound "arpy" -- generating a linear pattern of integers
+
+d1 $ sound $ samples "arpy*4" (run 4+1) -- equivalent
+
+
+-- COMBINING PATTERNS (see own tutorial for more details)
+-- using >|: the r.h.s. pattern sets the structure (up pattern not read entirely)
+-- obs: # equivalent to >| (takes the r.h.s. pattern structure)
+d1 $ up "0 2*2 5*4 4" >| sound "bd:9 . sn . hh hh:7"
+
+d1 $ sound "drum" >|  n "0 1*2 ~ 4" -- reversing the flow (coming from the right)
+
+-- using |<: the l.h.s. pattern sets the structure (sound pattern not read entirely)
+d1 $ up "0 2*2 5*4 4" |< sound "bd:9 . sn . hh hh:7"
+
+-- using |>| or |<|: combine both sides patterns
+d1 $ up "0 2 5 4" |<| sound "bd:9 . sn:1 . hh hh:7"
+
+d1 $ gain "0.75 0.5*2 1*4" |<| sound "bd:9 . bd hh:7 . hh sn:3"
+
+
+-- CONTINUOUS PATTERNS
+-- obs: between 0 and 1 if range not specified
+d1 $ sound "bd*16" # pan sine
+
+d1 $ sound "bd bd . hh hh hh:7" # pan (density 0.5 $ sine)
+
+d1 $ sound "bd*16" # speed (range 0.5 2 $ tri) -- scaling oscillation
+
+d1 $ sound "bd*16" # speed (range (-1) 1 $ sine) -- oscillation can be negative
+
+d1 $ sound "bd*16" # speed ((range 0.5 2 sine) * (slow 2 saw)) -- functions can be combined
+
+-- example: LFO on resonant lowpass
+d1
+  $ sound "hh*16"
+  # cutoff
+  (
+    range 200 2000
+    $ slow 4
+    $ sine
+  )
+  # resonance "0.4"
+
+-- POLYMETERS
+-- two sequences of different lengths, sharing the same tempo (using curly brackets)
+-- obs: leftmost sequence determines the rhythmic structure
+d1 $ sound "{bd hh ~ hh:7, ~ ~ arpy notes notes:2}" -- structure in 4:4
+
+d1 $ sound "{arpy arpy:2 arpy:3 notes notes:2, bd hh ~ hh:7}" -- structure of 5:4
+
+d3 $ sound "cp*4" # gain 0.7
+
+d1 $ sound "{arpy arpy:2 arpy:3 notes notes:2}%3" -- specifying the base pulse, i.e. 5:3
+-- obs: applies also to all patterns
+
+-- TIME SHIFTING
+d1 $ (0.25 <~) $ sound "bd*2 hh*2 hh:7 sn:2" -- forwards
+
+d1 $ (0.125 ~>) $ sound "bd*2 hh*2 hh:7 sn:2" -- backwards
+
+d1 $ every 4 ("[0 0.25 0.125]" ~>) $ sound "bd*2 hh*2 hh:7 sn:2" -- conditionally
+
+d1 $ "[0 0.25]/4" <~ (sound "bd*2 hh*2 hh:7 sn:2") -- w/ patterns
+
+
+-- RANDOMNESS
+-- rand outputs a value between 0 and 1
+d1 $ sound "bd*8" # pan rand
+
+d1 $ sound "bd*8" # pan (slow 0.5 rand) -- slow generation
+
+d1 $ sound "bd*4" # pan (range 0 0.5 $ rand) -- rand can be bounded
+
+d1 $ sound "bd*16" # pan ((range rand rand $ sine)) -- randomic range limits
+
+d1 $ sound "sn*2" # n (irand 10) -- use irand for integers
+
+
+-- PROBABILITIES
+d1 $ sound "bd bd? . sn:2?" -- p(sample removed) = 0.5
+
+d1 $ degrade $ sound "bd bd . sn:2" -- applied to the whole sequence
+
+d1 $ degradeBy 0.3 $ sound "bd bd . sn:2" -- p(removed) = 0.3
+
+d1 $ sometimesBy 0.3 (# crush 2) $ sound "bd bd . sn:2" -- p(effect applied) = 0.3
+
+hush
+
+-- PATTERN VARIATIONS
+-- layering conditional logic
+-- using every n (function)
+d1 $ every 4 (0.25 <~) $ every 3 (rev) $ sound "bd bd . sn:2"
+
+-- using whenmod (x y)
+d1 $ whenmod 4 3 (# speed "-1 -1.2 . 0.2") $ sound "bd bd . sn:2"
+
+-- creating fills and replacing patterns
+d1 $ every 2 (const (sound "hh*3 hh:7")) $ sound "bd . sn:2"
+
+-- SEQUENCES OF PATTERNS
+-- linear
+d1 $ cat [sound "hh*3 hh:7", sound "bd . sn:2"] -- keep original structure
+
+d1 $ fastcat [sound "hh*3 hh:7", sound "bd . sn:2"] -- squeeze to one cycle
+
+d1 $ randcat [sound "hh*3 hh:7", sound "bd . sn:2"] -- choose random sequence
+
+-- non linear
+d1 $ stack [sound "hh hh hh . ~ hh:7", sound "bd . sn:2"]
+
+
+-- PATTERNS TRANSITION
+d1 $ sound (samples "hc*8" (iter 4 $ run 4))
+
+xfadeIn 1 8 $ sound "bd(5,8)" -- fade over 8 cycles
+
+

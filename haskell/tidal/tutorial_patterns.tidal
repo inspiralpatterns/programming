@@ -1,0 +1,69 @@
+-- COMBINING PATTERNS
+-- if not specified, structure comes from both patterns
+-- "x y" + "a b c" = "ax [bx by] cy"
+d1 $ up ("0 2" + "4 7 9") # sound "moog" # sustain 0.3
+d1 $ up ("0 2" |+| "4 7 9") # sound "moog" # sustain 0.3 -- equivalent
+
+-- keep left structure, last of the triplet is ignored
+d1 $ up ("0 2" |+ "4 7 9") # sound "moog" # sustain 0.3
+-- keep right structure, i.e. 3:4
+d1 $ up ("0 2" +| "4 7 9") # sound "moog" # sustain 0.3
+
+-- MORE ON OPERATORS
+-- take right structure (hh not played) with left samples
+d1 $ sound "bd . hh . sn . ~" <| gain "0.9 0.6"
+-- take left structure (hh gain = 0.9) with right gain values
+d1 $ sound "bd . hh . sn . ~" |> gain "0.9 0.6"
+
+-- control patterns can be combined
+d1 $ sound "drum" |+| n "2 3" -- equivalent to "drum:2 drum:3"
+d1 $ sound "drum" |+| n "1 2" |+| n "4 5 6" -- see first example
+
+
+-- example of patterns combination
+-- left: 2/2 meter, right 3/4 meter
+d1 $ sound "bd bd . hh" |<| gain "0.9 0.5 0.7" -- + delay "[0.5 0.2 0.8]" # orbit 1 + crush "[9 12 4]"
+
+-- delaytime is a combination of 2/2 meter + 3/4 patterns
+d1 $ sound "bd . hh" # delay 0.1 + delaytime ("0 0.3" + "0.1 0.2 0.7")
+
+
+-- PATTERN TRANSFORMATIONS
+-- 1. every 3 cycles, change structure speed
+-- 2. every 2 cycles, increment the starting subdivision
+-- 3. every 2 cycles, play samples backwards
+-- 4. play hh:7 every 2 cycles
+d1 $ every 3 (fast 0.7) $ every 2 (iter 3) $ every 2 (# speed (-1)) $ sound "bd bd . hh hh:7/2"
+
+-- 1. every 3 cycles, play a different samples backwards
+-- 2. play original and effect on different outs
+-- 3. chain transformations together
+-- 4. apply different gains to effect and combine patterns
+d1 $ jux (chunk 3 (# speed (-1)) . (|<| gain "0.9 0.4 0.7")) $ s "bd . hh hh:7/2"
+
+
+-- SAMPLE MANIPULATION
+-- cut truncates hh:7 only when hh is played
+d1 $ stack [sound "bd", sound "~ . ~ . ~ . hh:7 hh/2"] # cut 1
+-- legato always truncates the sample
+d1 $ stack [sound "bd", sound "~ . ~ . ~ . hh:7 hh/2"] # legato 1
+
+-- splicing
+d1 $ chop 4 $ sound "bd drum:2"
+-- striate splices each sample but interleaves the parts
+d1 $ striate 4 $ sound "bd drum:2"
+
+-- 1. the samples are spliced in 4
+-- 2. delay is applied
+-- 3. chain transformation together and play it on a different out
+-- 4. delay time pattern applied
+d1 $ jux (chop 4 . (# delay 0.1)) $ jux ((# crush 4) . (|<| gain "0.4 0.6 0.1")) $ sound "bd sn:" + delaytime "0.875 0.375"
+
+-- randslice plays random pieces of the spliced sample
+d2 $ randslice 32 $ sound "hh:7*16" # pan (density 2 $ sine) -- + delaytime "0.5 0.3 0.9" # delay 0.5 # room 0.3 # orbit 1
+-- loopAt fits the sample to a specific amount of cycles
+d1 $ rev $ loopAt 8 $ chop 128 $ sound "bev" # speed (-1) + delay "0.3"
+
+
+
+
