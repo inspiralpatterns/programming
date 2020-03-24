@@ -31,7 +31,8 @@ d1 $ sound "[bd bd] sn:1"
 d3 $ sound "hh . hh hh . ~ . hh"
 
 -- layering (polirythms)
-d4 $ sound "[~ . bass, ~ damage_rim . ~ . damage_rim:1]"
+-- equivalent to use `stack`
+d4 $ sound "[hh . bass, ~ damage_rim . ~ . damage_rim:1]"
 
 -- one sample per cycle (loop over steps)
 d3 $ sound "<hh  hh:7 ~ >"
@@ -103,14 +104,21 @@ d1
 
 -- obs: pattern structure is given by note pattern
 d1
-  $ n
-  (
-    off 0.125 (+12)   -- first offset on note pattern by octave
-    $ off 0.25 (+7)   -- second offset on note patter by ascending 5th
-    $ slow 2
-    $ "0(3,8) [5 7]"  -- Euclidean rhythm in the first half of the note pattern
-  )
-  # sound "bass"
+    $ sometimesBy 0.45 (# accelerate (-2))
+    $ sometimes ((# delaytime 0.25) . (# delayfeedback 0.6))
+    $ degradeBy 0.31
+    $ jux (every 2 (# coarse 8) . (# crush ((*4) $ saw)))
+    $ n
+    (
+        off 0.125 (+12)   -- first offset
+        $ off 0.5 (+3)   -- second offset
+        $ slow "8"
+        $ "0(3,8) [5 7]"   
+        )
+    # sound "juno"
+    # legato 2
+    # delay 0.4
+    # cps (slow 8 $ range 0.4 1.2 sine)
 
 hush
 
@@ -154,7 +162,7 @@ d1 $ sound $ samples "arpy*4" (run 4+1) -- equivalent
 -- COMBINING PATTERNS (see own tutorial for more details)
 -- using >|: the r.h.s. pattern sets the structure (up pattern not read entirely)
 -- obs: # equivalent to >| (takes the r.h.s. pattern structure)
-d1 $ up "0 2*2 5*4 4" >| sound "bd:9 . sn . hh hh:7"
+d1 $ up "0 2*2 5*4 4" < sound "bd:9 . sn . hh hh:7"
 
 d1 $ sound "drum" >|  n "0 1*2 ~ 4" -- reversing the flow (coming from the right)
 

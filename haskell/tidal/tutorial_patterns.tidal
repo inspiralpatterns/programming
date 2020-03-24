@@ -4,25 +4,26 @@
 d1 $ up ("0 2" + "4 7 9") # sound "moog" # sustain 0.3
 d1 $ up ("0 2" |+| "4 7 9") # sound "moog" # sustain 0.3 -- equivalent
 
--- keep left structure, last of the triplet is ignored
-d1 $ up ("0 2" |+ "4 7 9") # sound "moog" # sustain 0.3
--- keep right structure, i.e. 3:4
+-- keep left structure and sum when applicable
+-- last of the triplet is ignored
+d1 $ up ("0 2" |+ "0 0 9") # sound "moog" # sustain 0.3
+-- keep right structure, i.e. 3/4
 d1 $ up ("0 2" +| "4 7 9") # sound "moog" # sustain 0.3
 
 -- MORE ON OPERATORS
 -- take right structure (hh not played) with left samples
-d1 $ sound "bd . hh . sn . ~" <| gain "0.9 0.6"
+d1 $ sound "bd . hh . sn . ~" +| gain "0.9 0.6"
 -- take left structure (hh gain = 0.9) with right gain values
-d1 $ sound "bd . hh . sn . ~" |> gain "0.9 0.6"
+d1 $ sound "bd . hh . sn . ~" |+ gain "0.9 0.6"
 
 -- control patterns can be combined
-d1 $ sound "drum" |+| n "2 3" -- equivalent to "drum:2 drum:3"
-d1 $ sound "drum" |+| n "1 2" |+| n "4 5 6" -- see first example
+d1 $ sound "drum" +| n "2 3" -- equivalent to "drum:2 drum:3"
+d1 $ sound "drum" + n "1 2" + n "4 5 6" -- see first example
 
 
 -- example of patterns combination
 -- left: 2/2 meter, right 3/4 meter
-d1 $ sound "bd bd . hh" |<| gain "0.9 0.5 0.7" -- + delay "[0.5 0.2 0.8]" # orbit 1 + crush "[9 12 4]"
+d1 $ sound "bd bd . hh" # gain "0.9 0.5 0.7" -- + delay "[0.5 0.2 0.8]" # orbit 1 + crush "[9 12 4]"
 
 -- delaytime is a combination of 2/2 meter + 3/4 patterns
 d1 $ sound "bd . hh" # delay 0.1 + delaytime ("0 0.3" + "0.1 0.2 0.7")
@@ -62,8 +63,4 @@ d1 $ jux (chop 4 . (# delay 0.1)) $ jux ((# crush 4) . (|<| gain "0.4 0.6 0.1"))
 -- randslice plays random pieces of the spliced sample
 d2 $ randslice 32 $ sound "hh:7*16" # pan (density 2 $ sine) -- + delaytime "0.5 0.3 0.9" # delay 0.5 # room 0.3 # orbit 1
 -- loopAt fits the sample to a specific amount of cycles
-d1 $ rev $ loopAt 8 $ chop 128 $ sound "bev" # speed (-1) + delay "0.3"
-
-
-
-
+d1 $ slow 64 $ rev $ loopAt 32 $ striate' 1024 (1/16) $ sound "bev" # speed "-1" + delay "0.3"
