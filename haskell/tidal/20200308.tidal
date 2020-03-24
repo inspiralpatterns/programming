@@ -1,0 +1,6 @@
+do
+    let x = "1 -0.5" :: Pattern Double
+    let y = (0.5 - x) / 2
+    d1 $ s "piano_c" +| speed x # legato 1
+    d2 $ s "piano_c:3" +| speed y # legato 2
+    d3 $ slow 8 $ s "grain" # up "-2" # speed (1/8) # gain 0.7

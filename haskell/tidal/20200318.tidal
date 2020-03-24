@@ -1,0 +1,62 @@
+d1
+    $ slow 4
+    $ s "damage_bd:3 damage_rim"
+    # room 0.2 # size 0.7
+    # gain 1
+    # orbit 1
+
+d2 
+    $ degradeBy 0.9
+    $ every 2 (# up (choose [-5, 0, -12, 7]))
+    $ s "[nice_harm/3, nice_harm/2]"
+    +| delaytime "0.25 0.9"
+    # delayfeedback 0.3
+    # delay (slow 8 $ range 0 0.5 saw)
+    # speed "<-1 0.5>"
+    # orbit 2
+
+do
+    let del = delaytime 0.7 # delayfeedback 0.6 # delay (slow 4 $ saw)
+    let rampGain rampLen rampShape = gain (slow rampLen $ range 0.7 1 $ rampShape)
+    d2
+        $ slow 4
+        $ fastFromList[True, False, False, True] >>= \f ->
+        if not f
+        then
+            slow "<2,3>"
+            $ slowstripe 4
+            $ n (irand 6)
+            # s "piano_f" |+| up "-12 0"
+            # del
+            # rampGain 4 sine
+        else
+            s "piano_f" # n "<0 5 9>" # lpf 800 # delayfeedback 0.6 
+            # del
+            # rampGain 2 isaw
+
+do
+    let ramp = slow 4 $ range 0.5 1 $ saw
+    d4
+        $ jux (chop 16)
+        $ s "ac_guitar@4" # up "13" 
+        # gain ramp
+        # lpf (range 200 500 ramp)
+        # pan rand
+
+
+do
+    let fx = crush $ (+ 3) $ irand 9
+    let smoothGain = gain 1
+    d9
+        $ (segment 16 $ range 0 20 $ fast (rand) $ sine) >>= \f ->
+        if f > 10
+        then s "<damage_bd, damage_electro_fx!2>" # n (range 0 8 $ saw) # smoothGain # fx
+        else s "damage_rim" # smoothGain # fx
+    d10
+        $ (const $ "")
+        $ jux ( sometimes (0.25~>) )
+        $ s "bass" |+| up "<-5, 0 . -3!16>" # lpf 300 # end 0.2 # gain (slow 4 $ isaw)
+
+
+d5
+    $ s "moog" # up "-7" # end 0.2 # cut 0

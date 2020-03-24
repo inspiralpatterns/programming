@@ -1,0 +1,14 @@
+d1
+    $ n "0 1 <0 2>"
+    |+ sound "damage_electro_bd!2 . damage_rim"
+    |+ gain "1 0.7 0.9"
+    # size 0.1
+    # room 0.1
+    # orbit 1
+    + delay "[0.125 0.25]"
+    + delaytime ("0.125 0.3 0.75" + "0.125 0.5")
+    # crush "[9 12 7]"
+
+d2
+    $ s "blip*4" # gain 0.6
+

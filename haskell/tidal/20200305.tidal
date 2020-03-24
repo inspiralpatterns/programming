@@ -1,0 +1,52 @@
+do
+{
+    resetCycles;
+    d1
+        $ seqP [ 
+        (0, 12, sound "bd bd*2"), 
+        (4, 12, sound "hh*2 [sn cp] cp future*4"), 
+        (8, 12, sound (samples "arpy*8" (run 16)))
+        ]
+}
+
+
+do
+    let del = delaytime 0.25 # delay 0.3
+    d1
+        $ (fastFromList[False, True]) >>= \ f -> 
+        if not f 
+        then s "bd" # del 
+        else  s "hh" # del 
+
+
+d3
+    $ (run 8 # irand 2) >>= \ i ->
+    if even i
+    then  chop 8 $ s "pulse" # up 7 # end 0.33
+    else  chop 8 $ s "harm_complex" # up "-5" # begin 0.2 # end 0.4
+
+
+d7
+    $ (run 4 # irand 12) >>= \ f ->
+    if even f
+    then
+        do
+            let spinNo = 4
+            let amp = "[0.6 0.4 0.5]"
+            spin spinNo $ s "damage_bd_dist" + gain amp
+    else fast 2
+        $ spin 4 
+        $ stack ["damage_bd", "damage_hh*2"] # gain "0.8 0.6"
+        # crush (choose [4,7,9])
+        # orbit 7
+
+do
+    let transp = "[-12 -7]"
+    let trebbia = sound "trebbia"
+    let wobble = sound "juno_wobble"
+    d2
+        $ every 3 ((rev) . (# delaytime 0.125) . (# delay 0.4))
+        $ fastFromList[True, True, False, True] >>= \f ->
+        if f
+        then sometimes (# coarse 16) $ slow 4 $ striate 8 $ n (run 4) # trebbia + up transp
+        else chop 4 $ wobble # up transp # end 0.8 # crush 7 # gain (slow 4 $ range 1 0.5 isaw)
