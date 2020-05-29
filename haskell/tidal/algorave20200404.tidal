@@ -1,0 +1,23 @@
+do
+    let triodeDist x = triode x 
+    let randPan = pan (segment 16 $ rand)
+    d1
+        $ rarely (juxBy (rand) (# crush  3) . (# gain (range 0 1 $ saw)) . (# speed "-1"))
+        $ slow 16
+        $ struct (binary 101) $ s "juno_wobble" |+| note ((+3) (scale "minor" "0 -1 -2")) # triode 20 # gain 1 # distort 0.3
+    d2
+        $ slow 8 $ struct (ascii "vivalamerda")
+        $ every 3 (+ coarse "12 14 16") $ chunk 16 (# speed "-1") $ often ((# speed "-0.5") . (rev) . (# gain 0.6))
+        $ s "damage_electro_hh"
+        # n (irand 10) # gain 0.9 # triode 10 # nudge 0.01 # randPan
+    d3
+        $ whenmod 7 4 (# crush (choose [3, 5, 7]))
+        $ slow 4
+        $ binary "<14903 550 666 19043>" >>= \f ->
+        if f
+        then every 2 (# speed "-1") $ s "damage_electro_bd" # n (irand 5) # triode 30
+        else s "damage_electro_sn" # n (irand 8) # triode 50
+    d4
+        $ slow 8 $ s "nice_harm" # note "-9" # octersub 1 # distort 0.2
+    d5
+        $ whenmod 7 5 (# speed "-1") $ s "damage_electro_boom/2" # amp 0.9 # n (irand 6)
