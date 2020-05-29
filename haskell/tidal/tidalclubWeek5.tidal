@@ -1,0 +1,41 @@
+{-
+    TIDAL COURSE WEEK 5
+    Notes / Chords / Arpeggios
+-}
+
+irand 8 >>= \ x -> parseBP_E ("cmaj'" ++ x)
+
+parseBP_E ("c'maj" ++ "<'5 '6>")
+
+do 
+    let n = "<cs'min'6 cs'min'7 cs'min'8>"
+    d1
+        $ arpeggiate 
+        $ note (n |- 14) 
+        # s "juno_perc" 
+        # begin 0.2
+        # legato 1.5
+        # room 0.8 # size 0.4
+
+do 
+    let n = parseBP_E ("cs'min" ++ "<'6 '7 '8>")
+    d2
+        $ arpeggiate 
+        $ note (n |- 14) 
+        # s "juno_perc" 
+        # begin 0.2
+        # legato 1.5
+        # room 0.8 # size 0.4
+
+
+fast 2 $ arpeggiate $ note "cs'min'<6 7>" # s "superpiano" 
+
+fast 1 $ arpeggiate $ note (parseBP_E ("cs'min" ++ "'6 '7")) # s "superpiano" 
+
+queryArc (s "<bd sn>/3") (Arc 0 8)
+
+fast 4 $ s "<bd sn>/3"
+
+import Sound.Tidal.Chords
+
+chordList

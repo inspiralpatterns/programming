@@ -1,0 +1,26 @@
+{- study on isorhythm -}
+-- STREAM TEST --
+
+-- rhythmic pattern, talea
+-- melodic patterns, colores
+-- they might be same of different length
+
+do
+    let talea = "1 1 [ 0 1 ] [1!2]"
+        color1 = "0 1 2 3"
+        color2 = "4 3 -1 2"
+        colorFam = choose [color1, color2]
+        selScale = "minor"
+    d1
+        $ struct talea
+        $ note (scale selScale color1)
+        # s "juno_perc"
+        # legato 1
+    d2
+        $ slow "<2 1.5 3.2>"
+        $ mask (rev talea)
+        $ n ((|- 2) (scale selScale color2) )
+        # s "quantum_fx"
+        # legato 0.8
+
+d1 $ sound (fit 3 ["bd", "sn", "arpy", "arpy:1", "casio"] "0 [~ 1] 2 1")
