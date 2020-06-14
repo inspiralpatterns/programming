@@ -1,0 +1,47 @@
+{- THE FUNCTOR PATTERN -}
+-- feed chop with an LFO using fmap (<$>)
+d1
+    $ whenmod 13 9 ((# delay 0.4) . (# crush "<3 5 7>"))
+    $ jux rev
+    $ slow 2 
+    $ chop (round <$> (slow 8 $ range 1 128 $ sine))
+    $ s "piano_f@4" # n (irand 8)
+
+
+{- THE MONAD PATTERN -}
+-- using a pattern of random numbers to input
+-- to a function that operates values without context
+d1 $ (segment 16 $ irand 2) >>= \ i ->
+  if even i
+  then  chop 8 $ s "moog" # end 0.33
+  else  chop 8 $ s "sitar" # begin 0.2 # end 0.45
+
+
+{- THE APPLICATIVE PATTERN -}
+-- apply a Pattern of function to a pattern and get a new pattern
+-- a pattern of function, i.e. partial application
+
+:t min <$> ("1 2 3" ::Pattern Double)
+
+do
+    let idx = max <$> (segment 3 (irand 128)) <*> (irand 128)
+    d2 
+        $ n (segment "<3 7 8 2>" idx) # s "foley"
+        # delayt "1/6" # delay 0.4
+        # legato 0.8 # gain 0.8
+
+
+-- PATTERN OF PATTERNS
+-- e.g. control maxbound of irand with irand
+-- <$> needed because irand accepts Int and not patterns
+
+:t (\x -> segment 3 $ irand x) <$> (irand 6)
+
+-- innerJoin used to make in into pattern
+do
+    let maxBound = 24
+        noIdx = 3
+        idx = innerJoin $ (\x -> segment noIdx $ irand x) <$> (irand maxBound)
+    d1
+        $ fast "<1 2 2.5 -0.7>"
+        $ n idx # s "mute"
