@@ -38,7 +38,7 @@ noCodeLines' :: Maybe LiveCodingLanguage -> Int
 noCodeLines' (Just l)    = noCodeLines l        -- using pattern matching to access l from its context
 noCodeLines' Nothing     = 0
 
--- use maybe function (Data.Maybe)
+-- using maybe function (Data.Maybe)
 noCodeLines'' :: Maybe LiveCodingLanguage -> Int
 noCodeLines'' = maybe 0 noCodeLines
 
@@ -52,7 +52,9 @@ ensembleAge :: Ensemble -> Int
 ensembleAge = (foldl1 (+) . (map extractAge)) where
     extractAge = getAge . age
 
-
+-- using catMaybes
+ensembleAge' :: Ensemble -> Int
+ensembleAge' = \x -> foldl1 (+) (catMaybes $ map age x)
 
 
 
