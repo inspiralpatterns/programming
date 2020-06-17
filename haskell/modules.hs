@@ -56,7 +56,9 @@ ensembleAge = (foldl1 (+) . (map extractAge)) where
 ensembleAge' :: Ensemble -> Int
 ensembleAge' = \x -> foldl1 (+) (catMaybes $ map age x)
 
-
+-- using mapMaybe
+ensembleAge'' :: Ensemble -> Int
+ensembleAge'' = \x -> foldl1 (+) $ mapMaybe age x
 
 
 
