@@ -107,3 +107,11 @@ totalNoPerformances'' :: Ensemble -> Int
 totalNoPerformances'' = (foldl1 (+)) . (map performances)
 
 
+-- make instance of Eq for the LiveCodingLanguage space
+-- obs: can be simplified invoking deriving (Eq)
+instance Eq LiveCodingLanguage where
+    SuperCollider == SuperCollider = True
+    TidalCycles == TidalCycles = True
+    Extempore == Extempore = True
+    _ == _ = False -- catch all not true
+
