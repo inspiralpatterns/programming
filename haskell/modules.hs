@@ -60,6 +60,10 @@ ensembleAge' = \x -> foldl1 (+) (catMaybes $ map age x)
 ensembleAge'' :: Ensemble -> Int
 ensembleAge'' = \x -> foldl1 (+) $ mapMaybe age x
 
+-- using mapMaybe and function composition
+ensembleAge''' :: Ensemble -> Int
+ensembleAge''' = (foldl1 (+)) . (mapMaybe age)
+
 
 
 
