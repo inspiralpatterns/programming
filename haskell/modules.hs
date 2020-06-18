@@ -64,14 +64,3 @@ ensembleAge'' = \x -> foldl1 (+) $ mapMaybe age x
 ensembleAge''' :: Ensemble -> Int
 ensembleAge''' = (foldl1 (+)) . (mapMaybe age)
 
-
-
-
-
-
-
-
-
-
-
-
