@@ -41,6 +41,8 @@ liveCoderMap = fromList [
     ("Brighton", caplaz)
                         ]
 
+
+-- write a program that gives livecoder's info given location
 getResponse :: String -> String
 getResponse = liveCoderToString . queryLiveCoder
 
@@ -48,8 +50,21 @@ queryLiveCoder :: String -> Maybe LiveCoder
 queryLiveCoder = \x -> Data.Map.lookup x liveCoderMap
 
 liveCoderToString :: Maybe LiveCoder -> String
-liveCoderToString (Just l) = show l
+liveCoderToString (Just l) = showInfo l
 liveCoderToString Nothing = "Sorry, no livecoder found."
+
+showInfo :: LiveCoder -> String
+showInfo = \l ->  name l ++ " lives here. " ++ lang l
+
+getLanguage :: LiveCoder -> Maybe LiveCodingLanguage
+getLanguage = language
+
+showLanguage :: Maybe LiveCodingLanguage -> String
+showLanguage (Just l) = "They use the amazing " ++ (show l) ++ " language."
+showLanguage Nothing = "They do not use any specific language."
+
+lang :: LiveCoder -> String
+lang = showLanguage . getLanguage
 
 -- show livecoder info based on user prompt
 main :: IO ()
