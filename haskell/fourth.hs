@@ -50,8 +50,11 @@ dbProgram'' = do
         y   <- dbLookup2'         -- y :: Int
         return ( x + y )
 
-
-
-
+-- using applicative style instead of do
+-- motivation: the function is pure, we can lift it to DatabaseIO context
+dbProgram''' :: IO (Either String Int)
+dbProgram''' = do
+    putStrLn "This program is very useless but nicely written."
+    runExceptT $ (\x y -> x + y) <$> dbLookup1' <*> dbLookup2'
 
 
