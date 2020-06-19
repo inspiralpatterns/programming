@@ -42,6 +42,7 @@ dbLookup1' = return 7
 dbLookup2' :: DatabaseIO Int
 dbLookup2' = return 8
 
+dbProgram'' :: IO (Either String Int)
 dbProgram'' = do
     putStrLn "This program is useless but nice."
     runExceptT $ do        -- unwrap IO () from ExceptT
